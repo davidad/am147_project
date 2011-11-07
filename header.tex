@@ -1,0 +1,118 @@
+\documentclass[letter,11pt]{article}
+
+\usepackage[english]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}	% font definition
+\usepackage{datetime}
+\newdateformat{ymd}{\THEYEAR/\twodigit{\THEMONTH}/\twodigit{\THEDAY}}
+
+\usepackage{color}
+\usepackage{verbatim}
+\usepackage{listings}
+\lstset{ %
+language=C++,                % choose the language of the code
+basicstyle=\footnotesize,       % the size of the fonts that are used for the code
+numbers=left,                   % where to put the line-numbers
+numberstyle=\footnotesize,      % the size of the fonts that are used for the line-numbers
+stepnumber=1,                   % the step between two line-numbers. If it is 1 each line will be numbered
+numbersep=5pt,                  % how far the line-numbers are from the code
+backgroundcolor=\color{white},  % choose the background color. You must add \usepackage{color}
+showspaces=false,               % show spaces adding particular underscores
+showstringspaces=false,         % underline spaces within strings
+showtabs=false,                 % show tabs within strings adding particular underscores
+frame=single,   		% adds a frame around the code
+tabsize=2,  		% sets default tabsize to 2 spaces
+captionpos=b,   		% sets the caption-position to bottom
+breaklines=true,    	% sets automatic line breaking
+breakatwhitespace=false,    % sets if automatic breaks should only happen at whitespace
+%escapeinside={\%}{)}          % if you want to add a comment within your code
+}
+
+\usepackage{soul}
+\usepackage{bm}
+\usepackage{sectsty}
+\sectionfont{\centering\LARGE}
+\renewcommand{\thesection}{\relax}
+\setcounter{secnumdepth}{-1}
+\usepackage[compact]{titlesec}
+\usepackage{mdwlist}
+\usepackage{parskip}
+\usepackage{graphicx}
+\usepackage{framed}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{ltxtable}
+\usepackage{multicol}
+\usepackage[top=1.8cm,bottom=2.0cm,right=1.9cm,left=1.9cm]{geometry}
+\usepackage{pdflscape}
+\usepackage[numbers]{natbib}
+
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{latexsym}
+\usepackage{cancel}
+
+\usepackage[urw-garamond]{mathdesign}
+
+\usepackage{tikz}
+\usepackage{pgfplots}
+
+\usetikzlibrary{arrows,shapes,calc}
+
+\usepackage{url}
+\usepackage[ps2pdf,breaklinks=true,bookmarks=true,bookmarksopen,bookmarksopenlevel=2,pdfpagelayout=OneColumn,pagebackref=true]{hyperref}
+\usepackage{breakurl}
+\usepackage{makeidx}
+
+%\yyyymmdddate
+
+\hypersetup{
+    bookmarks=true,         % show bookmarks bar?
+    unicode=false,          % non-Latin characters in Acrobat’s bookmarks
+    pdftoolbar=false,        % show Acrobat’s toolbar?
+    pdfmenubar=true,        % show Acrobat’s menu?
+    pdffitwindow=true,     % window fit to page when opened
+    pdfstartview={FitBV},    % fits the width of the page to the window
+    pdfauthor={David Dalrymple},     % author
+    pdfcreator={David Dalrymple},   % creator of the document
+    pdfproducer={David Dalrymple}, % producer of the document
+    pdfnewwindow=true,      % links in new window
+    colorlinks=true,       % false: boxed links; true: colored links
+    linkcolor=blue,          % color of internal links
+    citecolor=magenta,        % color of links to bibliography
+    filecolor=magenta,      % color of file links
+    urlcolor=cyan           % color of external links
+}
+
+
+\renewcommand*{\backref}[1]{}
+%\renewcommand*{\backrefalt}[4]{%
+  %\ifcase #1 %
+%(Not cited.)%
+%\or
+%(Cited on page #2.)%
+%\else
+%(Cited on pages #2.)%
+%\fi
+%}
+
+\newcommand{\attrib}[1]{\nopagebreak{\raggedleft\footnotesize #1\par}}
+\newcommand{\todo}[1]{\textcolor{lightgray}{\textit{<<#1>>}}}
+\newcommand{\tbc}{\begin{center} \todo{to be completed} \end{center}}
+
+\setlength{\parskip}{0.3cm plus3mm minus1mm}
+\setlength{\parindent}{0cm}
+\setlength{\columnsep}{7mm}
+\setlength{\premulticols}{1cm}
+\setlength{\postmulticols}{1cm}
+
+
+\begin{document}
+
+\begin{center}
+\parbox[b]{3cm}{\hfill Applied Math 147 \hfill} \hspace{1cm} Project Proposal: \textbf{The Dynamics of Language} \hspace{1cm} \parbox[b]{5cm}{\hfill \textit{David Dalrymple and Yiren Lu} \hfill} \\[-3mm]
+\rule{\textwidth}{0.4pt}
+\end{center}
+

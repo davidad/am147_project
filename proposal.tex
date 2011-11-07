@@ -1,0 +1,42 @@
+\input{header}
+
+\newcommand{\pa}[1]{\textcolor{red}{#1}}
+\newcommand{\pb}[1]{\textcolor{blue}{#1}}
+\newcommand{\pc}[1]{\textcolor{green}{#1}}
+
+\begin{center}
+\todo{\pa{\bfseries \textrm{Proposal A}} focuses on the mediation of language through acoustics. \newline \pb{\bfseries \textrm{Proposal B}} focuses on the basic cognitive aspects of language processing.}
+\end{center}
+
+\section{Goals}
+
+Language is one of the most complicated phenomena in everyday life, and by far
+the most common means by which human beings interact with each other. Viewed as
+a dynamical system, it is fascinating that spatial (written) and temporal
+(spoken) patterns can couple brain states so effectively! Our goal in this
+project is \textbf{\pa{to model how neural states can be coupled physically by
+acoustic transmission} \pb{to model how changing neural states representing
+interpreted phonemes can create complex information structures in cortex}}.
+
+\section{Plan}
+
+\pa{We will begin by developing a computer simulation of the basilar membrane
+of the cochlea, the organ responsible for mechanical spectral analysis of
+incoming auditory stimulation\cite{nilsen09,ruggero97}. The basilar membrane
+can be approximated as a series of coupled mass-spring oscillators with
+different resonant properties \cite{hubbard06,hubbard96}.  We will test this
+simulation by coupling the boundary conditions with recordings of actual
+speech. Time permitting, we will develop a neural model of phoneme
+classification \cite{mesgarani08}, which will be coupled to the output of the
+basilar membrane model. We may even go so far as to attempt a mechanical cochlea
+\cite{hubbard06,keolian97}.} \pb{We will attempt to develop a simulated dynamical system
+which exhibits highly specific sequence dependence, so that many differences in
+presented input patterns are essentially abolished in the output, but specific
+differences of comparable magnitude reliably produce dramatically different
+results.}
+
+\bibliographystyle{abbrvnat}
+\bibliography{am147}
+
+
+\end{document}
