@@ -5,22 +5,35 @@
 Language is one of the most complicated phenomena in everyday life, and by far
 the most common means by which human beings interact with each other. Viewed as
 a dynamical system, it is fascinating that spatial (written) and temporal
-(spoken) patterns can couple brain states so effectively! Our goal in this
-project is \textbf{to model how neural states can be coupled physically by
-acoustic transmission}.
+(spoken) patterns can couple brain states so effectively! A key capability for
+this process is the remarkable properties of the mammalian cochlea, the organ
+that transduces the mechanical vibrations of sound into neural impulses. Our
+goals in this project are \textbf{to understand quantitatively the function of
+the cochlea} in the context of language, and \textbf{to study the
+characteristics of the local parameter space}, with an eye toward the evolution
+of the cochlea's capabilities (on the ``slow time-scale'' of evolution\cite{manley72}).
 
 \section{Plan}
 
-We will begin by developing a computer simulation of the basilar membrane
-of the cochlea, the organ responsible for mechanical spectral analysis of
-incoming auditory stimulation\cite{nilsen99,ruggero97}. The basilar membrane
-can be approximated as a series of coupled mass-spring oscillators with
-different resonant properties \cite{hubbard06,hubbard96}.  We will test this
-simulation by coupling the boundary conditions with recordings of actual
-speech. Time permitting, we will develop a neural model of phoneme
-classification \cite{mesgarani08}, which will be coupled to the output of the
-basilar membrane model. We may even go so far as to attempt a mechanical cochlea
-\cite{hubbard06,keolian97}.
+We will begin by developing a computer simulation of the basilar membrane of
+the cochlea, the organ responsible for mechanical spectral analysis of incoming
+auditory stimulation\cite{nilsen99,ruggero97}. The basilar membrane can be
+approximated as a series of coupled mass-spring oscillators with different
+resonant properties \cite{hubbard06,hubbard96}, as a cascade of filters
+\cite{linggard89}, using finite element methods \cite{skrodzka05}, or a variety
+of other techniques. Our first task will be to evaluate each of these
+approaches for ease of implementation, biological accuracy, and mathematical
+elegance (or ease of analysis). After choosing and implementing a model, we
+will test the simulation by coupling the boundary conditions with recordings of
+actual speech. Time permitting, we will pursue some of the following
+extensions:
+
+\begin{itemize}
+	\item analyze the sensitivity of cochlear functions to various tuning parameters \cite{yates90} and identify bifurcations
+	\item develop a neural model of phoneme classification \cite{mesgarani08}, which will be coupled to the output of the
+basilar membrane model
+	\item attempt a mechanical cochlea \cite{hubbard06,keolian97}
+\end{itemize}
 
 \bibliographystyle{abbrvnat}
 \bibliography{am147}
