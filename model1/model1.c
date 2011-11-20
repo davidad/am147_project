@@ -118,19 +118,28 @@ int main(int argc, char** argv) {
 
 	rkdumb(x_init,t_out,x_out,2*n,t_init,t_end,steps,f); //Actually run the simulation
 
+	//Output results
+	FILE* out;
+	if(argc==2) {
+		out=fopen(argv[1],"w");
+	} else {
+		out=stdout;
+	}
+
+	printf("[\n");
 	int j; //frame number
 	for(j=0;j<steps;j++) {
-		printf("t=%lf:\n",t_init+j*((t_end-t_init)/steps));
-		printf("POSITIONS: \t");
+		fprintf(out,"  {\n");
+		fprintf(out,"    t: %lf,\n",t_init+j*((t_end-t_init)/steps));
+		fprintf(out,"    x: [ ");
 		for(i=0;i<n;i++) {
-			printf("%lf\t",x_out[j][2*i]);
+			fprintf(out,(i!=n-1)?"%lf, ":"%lf ],\n",x_out[j][2*i]);
 		}
-		printf("\n");
-
-		printf("VELOCITIES:\t");
+		fprintf(out,"    v: [ ");
 		for(i=0;i<n;i++) {
-			printf("%lf\t",x_out[j][2*i+1]);
+			fprintf(out,(i!=n-1)?"%lf, ":"%lf ]\n",x_out[j][2*i+1]);
 		}
-		printf("\n\n");
+		fprintf(out,"  },\n");
 	}
+	printf("]\n");
 }
