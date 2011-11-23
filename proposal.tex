@@ -6,8 +6,8 @@ Language is one of the most complicated phenomena in everyday life, and by far
 the most common means by which human beings interact with each other. Viewed as
 a dynamical system, it is fascinating that spatial (written) and temporal
 (spoken) patterns can couple brain states so effectively! A key capability for
-this process is the remarkable properties of the mammalian cochlea, the organ
-that transduces the mechanical vibrations of sound into neural impulses. Our
+this process is the remarkable properties of the mammalian cochlea, an organ in the inner ear
+that translates the mechanical vibrations of sound into neural impulses. Our
 goals in this project are \textbf{to understand quantitatively the function of
 the cochlea} in the context of language, and \textbf{to study the
 characteristics of the local parameter space}, with an eye toward the evolution
@@ -25,14 +25,15 @@ of other techniques. Our first task will be to evaluate each of these
 approaches for ease of implementation, biological accuracy, and mathematical
 elegance (or ease of analysis). After choosing and implementing a model, we
 will test the simulation by coupling the boundary conditions with recordings of
-actual speech. Time permitting, we will pursue some of the following
+actual speech. We will perform analysis on sensitivity and impulse response. Time permitting, we will pursue some of the following
 extensions:
 
 \begin{itemize}
-	\item analyze the sensitivity of cochlear functions to various tuning parameters \cite{yates90} and identify bifurcations
+	\item analyze the sensitivity of cochlear functions to various tuning parameters (such as the frequency of the incoming signal and/or the stiffness of the membrane) \cite{yates90} and identify bifurcations
 	\item develop a neural model of phoneme classification \cite{mesgarani08}, which will be coupled to the output of the
 basilar membrane model
 	\item attempt a mechanical cochlea \cite{hubbard06,keolian97}
+	\item implement a second, less mathematically elegant but empircally more accurate model (such as finite differences), and compare results
 \end{itemize}
 
 \bibliographystyle{abbrvnat}
