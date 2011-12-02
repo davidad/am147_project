@@ -60,7 +60,7 @@ void alloc_out(int n, int steps, double** tout, double*** xout) {
 }
 
 int main(int argc, char** argv) {
-	int n=3; // Number of masses in the system
+	int n=15; // Number of masses in the system
 	int i; //General purpose loop index, generally ranges from 0 to n-1
 	double m[n]; // Masses (constants)
 	double k[n]; // Spring constants
@@ -98,8 +98,8 @@ int main(int argc, char** argv) {
 	//Initialize constants
 	for(i=0;i<n;i++) {
 		m[i] = 1.0;
-		k[i] = 1.0;
-		b[i] = 0.0;
+		k[i] = 1.5;
+		b[i] = 0.8;
 		c[i] = 1.0;
 	}
 
@@ -111,8 +111,8 @@ int main(int argc, char** argv) {
 	}
 	double t_init = 0.0;
 
-	int steps = 200; // How many steps (like frames of animation) to simulate
-	double t_end = 5.0; // How many seconds those steps should cover
+	int steps = 4000; // How many steps (like frames of animation) to simulate
+	double t_end = 20.0; // How many seconds those steps should cover
 	double *t_out, **x_out; //This is where the results for each step get stored.
 	alloc_out(2*n,steps,&t_out,&x_out); // Allocate memory for the above
 
