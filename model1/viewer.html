@@ -1,0 +1,32 @@
+<html>
+	<head>
+		<title>Cochlea Model 1 Viewer</title>
+	</head>
+	<body>
+		<p><i>Note: if you're running this locally in Chrome, you have to use "--allow-file-access-from-files"</i></p>
+		<p>Select a data file (output from the C code):</p>
+		<p><input type=file></p>
+		<div id="holder"></div>
+		<script>
+			var upload = document.getElementsByTagName('input')[0];
+			if(typeof window.FileReader === 'undefined') {
+				alert("HTML5 File API not supported");
+			}
+			upload.onchange = function(e) {
+				e.preventDefault();
+				var file = upload.files[0], reader = new FileReader();
+				var holder = document.getElementById('holder');
+				reader.onloadend = function(event) {
+					var datastring = event.target.result;
+					var data = JSON.parse(event.target.result);
+					var dataview = document.createElement('pre');
+					dataview.innerHTML = datastring;
+					holder.innerHTML = '';
+					holder.appendChild(dataview);
+				}
+				reader.readAsText(file);
+				return false;
+			};
+		</script>
+	</body>
+</html>
