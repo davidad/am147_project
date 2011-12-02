@@ -130,16 +130,16 @@ int main(int argc, char** argv) {
 	int j; //frame number
 	for(j=0;j<steps;j++) {
 		fprintf(out,"  {\n");
-		fprintf(out,"    t: %lf,\n",t_init+j*((t_end-t_init)/steps));
-		fprintf(out,"    x: [ ");
+		fprintf(out,"    \"t\": %lf,\n",t_init+j*((t_end-t_init)/steps));
+		fprintf(out,"    \"x\": [ ");
 		for(i=0;i<n;i++) {
 			fprintf(out,(i!=n-1)?"%lf, ":"%lf ],\n",x_out[j][2*i]);
 		}
-		fprintf(out,"    v: [ ");
+		fprintf(out,"    \"v\": [ ");
 		for(i=0;i<n;i++) {
 			fprintf(out,(i!=n-1)?"%lf, ":"%lf ]\n",x_out[j][2*i+1]);
 		}
-		fprintf(out,"  },\n");
+		fprintf(out,(j!=steps-1)?"  },\n":"  }\n");
 	}
 	printf("]\n");
 }
