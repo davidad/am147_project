@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 
 //derivs takes arguments (t,*x,*dxdt)
 void rk4(double* x, double* dxdt, int n, double t, double h, double* xout, void (*derivs)(double, double*, double*)) {
@@ -60,13 +61,17 @@ void alloc_out(int n, int steps, double** tout, double*** xout) {
 }
 
 int main(int argc, char** argv) {
-	int n=15; // Number of masses in the system
+	int n=100; // Number of masses in the system
 	int i; //General purpose loop index, generally ranges from 0 to n-1
 	double m[n]; // Masses (constants)
 	double k[n]; // Spring constants
 	double b[n]; // Damping constants
-	double c[n]; // Coupling spring constants
-	
+	double c[n+1]; // Coupling spring constants
+
+	double input(double t) { // Input/driver for boundary condition
+		return sin(16*t);
+	}
+
 	// Given a mass i, its current position is stored in xv[2*i],
 	// while its current velocity is stored in xv[2*i+1].
 	// Similarly, the time derivative of position is in dxdt[2*i]
@@ -81,14 +86,21 @@ int main(int argc, char** argv) {
 			double x_im1;
 			//xim1 is x_{i-1}. If i is zero, it's a boundary condition.
 			if(i==0) {
-				//For now the boundary condition is going to be 1.
-				x_im1=1.0;
+				x_im1=input(t);
 			} else {
 			  x_im1 = xv[2*(i-1)];
 			}
 
+			double x_ip1;
+			//xip1 is x_{i+1}. If i is n-1, it's a boundary condition.
+			if(i+1==n) {
+				x_ip1=0;
+			} else {
+				x_ip1 = xv[2*(i+1)];
+			}
+
 			double x_i_dot = v_i;
-			double v_i_dot = - (1 / m[i]) * ( k[i]*x_i + c[i]*(x_i - x_im1) + b[i]*v_i);
+			double v_i_dot = - (1 / m[i]) * ( k[i]*x_i + c[i]*(x_i - x_im1) + c[i+1]*(x_i - x_ip1) + b[i]*v_i);
 
 			dxdt[2*i] = x_i_dot;
 			dxdt[2*i+1] = v_i_dot;
@@ -97,11 +109,12 @@ int main(int argc, char** argv) {
 
 	//Initialize constants
 	for(i=0;i<n;i++) {
-		m[i] = 1.0;
-		k[i] = 1.5;
-		b[i] = 0.8;
-		c[i] = 1.0;
+		m[i] = 0.1;
+		k[i] = 2.0;
+		b[i] = 0.0;
+		c[i] = 3.0;
 	}
+	c[n]=0.0;
 
 	//Initialize initial values
 	double x_init[2*n];
@@ -111,8 +124,8 @@ int main(int argc, char** argv) {
 	}
 	double t_init = 0.0;
 
-	int steps = 4000; // How many steps (like frames of animation) to simulate
-	double t_end = 20.0; // How many seconds those steps should cover
+	int steps = 500; // How many steps (like frames of animation) to simulate
+	double t_end = 10.0; // How many seconds those steps should cover
 	double *t_out, **x_out; //This is where the results for each step get stored.
 	alloc_out(2*n,steps,&t_out,&x_out); // Allocate memory for the above
 
@@ -132,14 +145,21 @@ int main(int argc, char** argv) {
 		fprintf(out,"  {\n");
 		fprintf(out,"    \"t\": %lf,\n",t_init+j*((t_end-t_init)/steps));
 		fprintf(out,"    \"x\": [ ");
+		double clamp(double z) {
+			if(z > 1e9) return 1e9;
+			else if(z< -1e9) return -1e9;
+			else if isnan(z) return 1e9;
+			else return z;
+		}
 		for(i=0;i<n;i++) {
-			fprintf(out,(i!=n-1)?"%lf, ":"%lf ],\n",x_out[j][2*i]);
+			fprintf(out,(i!=n-1)?"%lf, ":"%lf ],\n",clamp(x_out[j][2*i]));
 		}
 		fprintf(out,"    \"v\": [ ");
 		for(i=0;i<n;i++) {
-			fprintf(out,(i!=n-1)?"%lf, ":"%lf ]\n",x_out[j][2*i+1]);
+			fprintf(out,(i!=n-1)?"%lf, ":"%lf ]\n",clamp(x_out[j][2*i+1]));
 		}
 		fprintf(out,(j!=steps-1)?"  },\n":"  }\n");
 	}
 	printf("]\n");
+	return 0;
 }
