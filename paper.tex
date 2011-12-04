@@ -1,0 +1,59 @@
+\title{The Dynamics of Language}
+\author{
+        David Dalrymple and Yiren Lu
+}
+\date{\today}
+
+\documentclass[12pt]{article}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+The human cochlea can be modeled at primary level as a coupled series of damped mass-spring oscillators, where each oscillator corresponds to a mechnical Cu beam designed to tune the stiffness of the basilar membrane. This basic implementation, which simulates only the passive signal processing capabilities of the cochlea, can then be complemented with a modeling of the active process. The so-called active process is the active amplification, which is responsible for our ear's remarkable sensitivity and tuning, as well as its nonlinearity. The active amplification in steady state has been observed to have key characteristics of a Hopf birfucation (as oscillatory instability that occurs as parameters are adjusted continually). This paper presents an active amplification simulation coupled with an fluid flow model of the human cochlea. The model is then tested with inputs from natural language. 
+\end{abstract}
+ 
+
+\section{Introduction}
+The cochlea is a small spiral-shaped, fluid-filled cavity in the human ear. It is responsible for the transmission of pressure from the middle ear, and for the translation of these pressure impulses into electrical impulses subsequently carried by neurotransmitters to the brain. Computational simulations of the cochlea are motivated by a desire to understand how it is that we are able to hear, and by extension, how we are able to process language.
+   
+However, due to its geometric complexity and small size, the cochlea is difficult to model. A simple fluid model, by itself, fails to capture the majority of its nonlinear behavior. Nonlinear behavior is characterized by the fact that nonlinear effects become more marked, the smaller the forcing. This ever-presence of the nonlinearity suggests it is neither a property of the stiffness of the membrane nor of the fluid. Rather, the cochlea seems to be adding external energy to low-energy input signals and dampening high energy signals, in order to achieve its unique flexibility and raneg. And indeed, recent research has shown that the structure of outer hair cells on the basilar membrane is a linear array of coupled cells, each hovering near a hopf bifurcation point That is, it is a critical oscillation around a hopf bifurcation critical value, that induces an active amplification, and transitively nonlinear behavior.
+
+\paragraph{Outline}
+The remainder of this article is organized as follows.
+Section~\ref{previous work} gives account of previous work. Section~\ref{modeling} provides the mathematical equations behind the modeling of the cochlea. The computational framework of our simulation, coded in C, will be outlined and explained in Section~\ref{computer simulation}. Our results, mostly about effects of changing the parameter space, are described in Section~\ref{results}.
+Finally, Section~\ref{conclusions} gives the conclusions.
+
+\section{Previous work}\label{previous work}
+The cochlea has been studied extensively. In addition to fluid model that we are adopting, that of coupled mass oscillators, there are two others: 
+
+
+\section{Mathematical Basis for Modeling}\label{modeling}
+It's not entirely clear what the $P_n$ term should be, but the rest of the system looks something like this:
+\begin{align*}
+  \ddot{x_i} &= - \frac{1}{m_i} \left( k_i x_i + c_i (x_i-x_{i-1}) + b_i \dot{x_i} \right)
+\end{align*}
+With $v_i=\dot{x_i}$, this translates into two equations for a dynamical system:
+\begin{align*}
+  \dot{v_i} &= - \frac{1}{m_i} \left( k_i x_i + c_i (x_i-x_{i-1}) + b_i v_i \right) \\
+  \dot{x_i} &= v_i
+\end{align*}
+Of course, the actual dynamical system would have $2n$ equations, depending on the number
+of oscillators included.
+
+
+
+
+\section{Computer Simulation}\label{computer simulation}
+
+
+\section{Results}\label{results}
+In this section we describe the results.
+
+\section{Conclusions}\label{conclusions}
+We worked hard, and achieved very little.
+
+\bibliographystyle{abbrv}
+\bibliography{main}
+
+\end{document}
