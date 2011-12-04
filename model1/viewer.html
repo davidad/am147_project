@@ -32,7 +32,7 @@
 					var w = box_width+box_spacing;
 					var x_scale = d3.scale.linear().domain([0,1]).range([0,w]);
 					var swing = 600;
-					var y_scale = d3.scale.linear().domain([-1.4,1.4]).range([0,swing]);
+					var y_scale = d3.scale.linear().domain([-1,1]).range([0,swing]);
 					var h = swing + box_height;
 					d3.select("#viz").remove();
 					var viz = d3.select("body").append("svg:svg").attr("id","viz").attr("width",(data[0].x.length)*w).attr("height",h);
