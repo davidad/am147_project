@@ -70,9 +70,9 @@ int main(int argc, char** argv) {
 
 	double input(double t) { // Input/driver for boundary condition
 		double scale=3.0;
-		if(t<10.0) {
+		/*if(t<10.0) {*/
 			return scale*sin(4*t);
-		} else if (t<20.0) {
+		/*} else if (t<20.0) {
 			return scale*sin(8*t);
 		} else if (t<30.0) {
 			return scale*sin(16*t);
@@ -80,7 +80,7 @@ int main(int argc, char** argv) {
 			return scale*sin(32*t);
 		} else {
 			return scale*sin(64*t);
-		}
+		}*/
 	}
 
 	// Given a mass i, its current position is stored in xv[2*i],
@@ -97,7 +97,7 @@ int main(int argc, char** argv) {
 			double x_im1;
 			//xim1 is x_{i-1}. If i is zero, it's a boundary condition.
 			if(i==0) {
-				x_im1=0.0;
+				x_im1=input(t);
 			} else {
 			  x_im1 = xv[2*(i-1)];
 			}
@@ -110,7 +110,7 @@ int main(int argc, char** argv) {
 				x_ip1 = xv[2*(i+1)];
 			}
 
-			double pressure = input(t);
+			double pressure = 0.0;
 
 			double x_i_dot = v_i;
 			double v_i_dot = - (1 / m[i]) * ( k[i]*x_i + c[i]*(x_i - x_im1) + c[i+1]*(x_i - x_ip1) - pressure + b[i]*v_i);
@@ -122,10 +122,10 @@ int main(int argc, char** argv) {
 
 	//Initialize constants
 	for(i=0;i<n;i++) {
-		m[i] = 0.1+i*0.03;
-		k[i] = 2.0+i*0.08;
-		b[i] = 1.5+(n-i)*0.04;
-		c[i] = 1.0+i*0.1;
+		m[i] = 0.2+(n-i)*0.005;
+		k[i] = 1.4;
+		b[i] = 0.1;
+		c[i] = 3.0;
 	}
 	c[n]=0.0;
 	c[0]=1.0;
@@ -138,8 +138,8 @@ int main(int argc, char** argv) {
 	}
 	double t_init = 0.0;
 
-	int steps = 2500; // How many steps (like frames of animation) to simulate
-	double t_end = 50.0; // How many seconds those steps should cover
+	int steps = 7000; // How many steps (like frames of animation) to simulate
+	double t_end = 250.0; // How many seconds those steps should cover
 	double *t_out, **x_out; //This is where the results for each step get stored.
 	alloc_out(2*n,steps,&t_out,&x_out); // Allocate memory for the above
 
