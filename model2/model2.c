@@ -1,6 +1,11 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <math.h>
+/* Dependency on GSL: to install on OSX, sudo port install gsl-devel */
+#include "gsl/gsl_linalg.h"
+
+/* GENERIC FOURTH-ORDER RUNGE-KUTTA IMPLEMENTATION */
 
 //derivs takes arguments (t,*x,*dxdt)
 void rk4(double* x, double* dxdt, int n, double t, double h, double* xout, void (*derivs)(double, double*, double*)) {
@@ -60,120 +65,156 @@ void alloc_out(int n, int steps, double** tout, double*** xout) {
 	}
 }
 
+/* END GENERIC RUNGE-KUTTA IMPLEMENTATION */
+
 int main(int argc, char** argv) {
-	int n=100; // Number of masses in the system
+
+/* Algorithm and values from (Diependaal 1988) */
+
+  double ell_max=35.0; // (mm) length of basilar membrane
+	int n=512; // Number of discrete steps for ell
+  double delta = ell_max / (double)n; // Size of discrete steps in ell
 	int i; //General purpose loop index, generally ranges from 0 to n-1
-	double m[n]; // Masses (constants)
-	double k[n]; // Spring constants
-	double b[n]; // Damping constants
-	double c[n+1]; // Coupling spring constants
+  double ell[n+1];
+  for(i=0;i<=n;i++) {
+    ell[i] = delta*i;
+  }
 
-	double input(double t) { // Input/driver for boundary condition
-		double scale=3.0;
-		/*if(t<10.0) {*/
-			return scale*sin(4*t);
-		/*} else if (t<20.0) {
-			return scale*sin(8*t);
-		} else if (t<30.0) {
-			return scale*sin(16*t);
-		} else if (t<40.0) {
-			return scale*sin(32*t);
-		} else {
-			return scale*sin(64*t);
-		}*/
+  /* Time-independent parameters */
+  double m(double ell) { // mass of membrane unit
+    return 0.5; // (mg/mm^2)
+  }
+  double alpha(double ell) { // alpha = 2 * density * membrane_thickness / mass * channel_area
+    return 0.4; // (mm^-2)
+  }
+  
+  /* Behavior of basilar membrane */
+  double g(double ell, double x, double v) {
+    double k(double ell, double x, double v) {
+      return 200*exp(-0.3*ell); // (mg mm^-2 ms^-2)
+    }
+    double b(double ell, double x, double v) {
+      return 10*exp(-0.15*ell); // (mg mm^-2 ms^-1)
+    }
+    return k(ell,x,v)*x + b(ell,x,v)*v;
+  }
+
+  /* Forcing/driving/input function */
+	double input(double t) {
+		double scale=0.2;
+    return scale*sin(t*3.141);
 	}
 
-	// Given a mass i, its current position is stored in xv[2*i],
+  /* Membrane displacement and velocity */
+  double xv[2*n];
+	// Given a segment i, its current position is stored in xv[2*i],
 	// while its current velocity is stored in xv[2*i+1].
-	// Similarly, the time derivative of position is in dxdt[2*i]
-	// while the time derivative of velocity is in dxdt[2*i+1]
+  // The initial condition is rest:
+  for(i=0;i<n;i++) {
+    xv[2*i] = 0.0; // zero displacement
+    xv[2*i+1] = 0.0; // zero velocity
+  }
 
-	//This function, f, represnts all the equations of the dynamical system.
-	void f(double t, double* xv, double* dxdt) {
-		for(i=0;i<n;i++) {
-			double x_i = xv[2*i];
-			double v_i = xv[2*i+1];
-			
-			double x_im1;
-			//xim1 is x_{i-1}. If i is zero, it's a boundary condition.
-			if(i==0) {
-				x_im1=input(t);
-			} else {
-			  x_im1 = xv[2*(i-1)];
-			}
+  /* Spatial system */
+  // First compute the tridiagonal A matrix (not time-dependent)
+  gsl_vector* A_diag = gsl_vector_alloc(n);
+  gsl_vector* A_upper = gsl_vector_alloc(n-1);
+  gsl_vector* A_lower = gsl_vector_alloc(n-1);
+  gsl_vector_set(A_diag,0,0.5*alpha(ell[0])*delta+1/delta);
+  for(i=1;i<n;i++) {
+    gsl_vector_set(A_diag,i,delta*alpha(ell[i])+2/delta);
+  }
+  gsl_vector_set_all(A_upper,-1/delta);
+  gsl_vector_set_all(A_lower,-1/delta);
 
-			double x_ip1;
-			//xip1 is x_{i+1}. If i is n-1, it's a boundary condition.
-			if(i+1==n) {
-				x_ip1=0;
-			} else {
-				x_ip1 = xv[2*(i+1)];
-			}
+  //Reusable allocations
+  gsl_vector* k = gsl_vector_alloc(n);
+  gsl_vector p_vec = {.data = NULL, .size = n, .stride = 1, .block = NULL, .owner = 0};
 
-			double pressure = 0.0;
+  void solve_spatial_system(double* p, double* xv, double forcing) {
+    // Compute k vector
+    gsl_vector_set(k,0,0.5*alpha(ell[0])*delta*g(ell[0],xv[0],xv[1])-forcing);
+    for(i=1;i<n;i++) {
+      gsl_vector_set(k,i,alpha(ell[i])*delta*g(ell[i],xv[2*i],xv[2*i+1]));
+    }
 
-			double x_i_dot = v_i;
-			double v_i_dot = - (1 / m[i]) * ( k[i]*x_i + c[i]*(x_i - x_im1) + c[i+1]*(x_i - x_ip1) - pressure + b[i]*v_i);
+    // Set up p_vec struct
+    p_vec.data = p;
 
-			dxdt[2*i] = x_i_dot;
-			dxdt[2*i+1] = v_i_dot;
-		}
-	}
+    // Solve system
+    gsl_linalg_solve_tridiag(A_diag, A_upper, A_lower, k, &p_vec);
+  }
 
-	//Initialize constants
-	for(i=0;i<n;i++) {
-		m[i] = 0.2+(n-i)*0.005;
-		k[i] = 1.4;
-		b[i] = 0.1;
-		c[i] = 3.0;
-	}
-	c[n]=0.0;
-	c[0]=1.0;
+  /* Temporal system */
+  double p[n];
+  //from t and xv (x and \dot{x}), we must calculate dx/dt (\dot{x} and \ddot{x}).
+  void f(double t, double* xv, double* dxdt) {
+    //First we must solve the spatial system in P (transmembrane pressure).
+    solve_spatial_system(p,xv,input(t));
+    for(i=0;i<n;i++) {
+      double x_i = xv[2*i];
+      double v_i = xv[2*i+1];
 
-	//Initialize initial values
-	double x_init[2*n];
-	for(i=0;i<n;i++) {
-		x_init[2*i]   = 0.0; //Initial position of mass i
-		x_init[2*i+1] = 0.0; //Initial velocity of mass i
-	}
-	double t_init = 0.0;
+      double x_i_dot = v_i;
+      double v_i_dot = (1 / m(ell[i])) * (p[i] - g(ell[i], x_i, v_i));
 
-	int steps = 7000; // How many steps (like frames of animation) to simulate
-	double t_end = 250.0; // How many seconds those steps should cover
-	double *t_out, **x_out; //This is where the results for each step get stored.
-	alloc_out(2*n,steps,&t_out,&x_out); // Allocate memory for the above
+      dxdt[2*i] = x_i_dot;
+      dxdt[2*i+1] = v_i_dot;
+    }
+  }
+  
 
-	rkdumb(x_init,t_out,x_out,2*n,t_init,t_end,steps,f); //Actually run the simulation
+  /* Simulation parameters */
+  double t_max = 41.0; // ms
+  int iterations = (int)(64.0 * t_max);
+  double h = t_max / (double)iterations;
 
-	//Output results
+  double t = 0.0;
+  double dv[2*n];
+  double xv_new[2*n];
+
+  //JSON output setup
 	FILE* out;
 	if(argc==2) {
 		out=fopen(argv[1],"w");
 	} else {
 		out=stdout;
 	}
+  double clamp(double z) {
+    if(z > 1e9) return 1e9;
+    else if(z< -1e9) return -1e9;
+    else if isnan(z) return 1e9;
+    else return z;
+  }
+  fprintf(out,"[\n");
 
-	printf("[\n");
-	int j; //frame number
-	for(j=0;j<steps;j++) {
-		fprintf(out,"  {\n");
-		fprintf(out,"    \"t\": %lf,\n",t_init+j*((t_end-t_init)/steps));
-		fprintf(out,"    \"x\": [ ");
-		double clamp(double z) {
-			if(z > 1e9) return 1e9;
-			else if(z< -1e9) return -1e9;
-			else if isnan(z) return 1e9;
-			else return z;
-		}
+  //It's go time!
+  int j;
+  for(j=0;j<iterations;j++) {
+    f(t,xv,dv);
+    rk4(xv,dv,2*n,t,h,xv_new,f);
+    // Output==
+    fprintf(out,"  {\n");
+    fprintf(out,"    \"t\": %lf,\n",t);
+    fprintf(out,"    \"x\": [ ");
 		for(i=0;i<n;i++) {
-			fprintf(out,(i!=n-1)?"%lf, ":"%lf ],\n",clamp(x_out[j][2*i]));
+			fprintf(out,(i!=n-1)?"%lf, ":"%lf ],\n",clamp(xv[2*i]));
 		}
 		fprintf(out,"    \"v\": [ ");
 		for(i=0;i<n;i++) {
-			fprintf(out,(i!=n-1)?"%lf, ":"%lf ]\n",clamp(x_out[j][2*i+1]));
+			fprintf(out,(i!=n-1)?"%lf, ":"%lf ],\n",clamp(xv[2*i+1]));
 		}
-		fprintf(out,(j!=steps-1)?"  },\n":"  }\n");
-	}
-	printf("]\n");
-	return 0;
+		fprintf(out,"    \"p\": [ ");
+		for(i=0;i<n;i++) {
+			fprintf(out,(i!=n-1)?"%lf, ":"%lf ]\n",clamp(p[i]));
+		}
+		fprintf(out,(j!=iterations-1)?"  },\n":"  }\n");
+    // ========
+    t+=h;
+    memcpy(xv,xv_new,sizeof(double)*2*n);
+  }
+
+  fprintf(out,"]\n");
+
+  return 0;
 }

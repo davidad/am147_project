@@ -1,0 +1,56 @@
+<html>
+	<head>
+		<title>Cochlea Model 1 Viewer</title>
+		<script type="text/javascript" src="../d3/d3.js"/> </script>
+	</head>
+	<body>
+		<p><i>Note: if you're running this locally in Chrome, you have to use "--allow-file-access-from-files"</i></p>
+		<p>Select a data file (output from the C code):</p>
+		<p><input type=file></p>
+		<p><a href="#" onclick="setupViz()">Restart Visualization</a></p>
+		<div id="holder"></div>
+		<script>
+			var upload = document.getElementsByTagName('input')[0];
+			if(typeof window.FileReader === 'undefined') {
+				alert("HTML5 File API not supported");
+			}
+			function setupViz() {
+				var file = upload.files[0], reader = new FileReader();
+				var holder = document.getElementById('holder');
+				reader.onloadend = function(event) {
+					var datastring = event.target.result;
+					var data = JSON.parse(event.target.result);
+					/*var dataview = document.createElement('pre');
+					dataview.innerHTML = datastring;
+					holder.innerHTML = '';
+					holder.appendChild(dataview);*/
+
+					var timescale = ( data[1].t-data[0].t ) * 1000;
+					var box_width = 2;
+					var box_height = 8;
+					var box_spacing = 1;
+					var w = box_width+box_spacing;
+					var x_scale = d3.scale.linear().domain([0,1]).range([0,w]);
+					var swing = 600;
+					var y_scale = d3.scale.linear().domain([-1,1]).range([0,swing]);
+					var h = swing + box_height;
+					d3.select("#viz").remove();
+					var viz = d3.select("body").append("svg:svg").attr("id","viz").attr("width",(data[0].x.length)*w).attr("height",h);
+					viz.selectAll("rect").data(data[0].x).enter().append("svg:rect").attr("x", function(d,i) {return x_scale(i);}).attr("y", function(d) {return h - y_scale(d.value);}).attr("width",box_width).attr("height",box_height);
+					var i = 0;
+					function redraw() {
+						if(i+1<data.length) {i++;}
+						viz.selectAll("rect").data(data[i].x).attr("y",function(d) {return h - y_scale(d);});
+					}
+					setInterval(redraw,timescale);
+				}
+				reader.readAsText(file);
+			}
+			upload.onchange = function(e) {
+				e.preventDefault();
+				setupViz();
+				return false;
+			};
+		</script>
+	</body>
+</html>
