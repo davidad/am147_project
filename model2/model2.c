@@ -91,7 +91,7 @@ int main(int argc, char** argv) {
   /* Behavior of basilar membrane */
   double g(double ell, double x, double v) {
     double k(double ell, double x, double v) {
-      return 200*exp(-0.3*ell); // (mg mm^-2 ms^-2)
+      return 20000*exp(-0.3*ell); // (mg mm^-2 ms^-2)
     }
     double b(double ell, double x, double v) {
       return 10*exp(-0.15*ell); // (mg mm^-2 ms^-1)
@@ -101,8 +101,8 @@ int main(int argc, char** argv) {
 
   /* Forcing/driving/input function */
 	double input(double t) {
-		double scale=0.2;
-    return scale*sin(t*3.141);
+		double scale=1.0;
+    return scale*sin(t*8);
 	}
 
   /* Membrane displacement and velocity */
@@ -166,8 +166,9 @@ int main(int argc, char** argv) {
 
   /* Simulation parameters */
   double t_max = 41.0; // ms
-  int iterations = (int)(64.0 * t_max);
+  int iterations = (int)(500.0 * t_max);
   double h = t_max / (double)iterations;
+  int output_filter = 16; // output the result of only every Nth iteration
 
   double t = 0.0;
   double dv[2*n];
@@ -194,21 +195,23 @@ int main(int argc, char** argv) {
     f(t,xv,dv);
     rk4(xv,dv,2*n,t,h,xv_new,f);
     // Output==
-    fprintf(out,"  {\n");
-    fprintf(out,"    \"t\": %lf,\n",t);
-    fprintf(out,"    \"x\": [ ");
-		for(i=0;i<n;i++) {
-			fprintf(out,(i!=n-1)?"%lf, ":"%lf ],\n",clamp(xv[2*i]));
-		}
-		fprintf(out,"    \"v\": [ ");
-		for(i=0;i<n;i++) {
-			fprintf(out,(i!=n-1)?"%lf, ":"%lf ],\n",clamp(xv[2*i+1]));
-		}
-		fprintf(out,"    \"p\": [ ");
-		for(i=0;i<n;i++) {
-			fprintf(out,(i!=n-1)?"%lf, ":"%lf ]\n",clamp(p[i]));
-		}
-		fprintf(out,(j!=iterations-1)?"  },\n":"  }\n");
+    if(j%output_filter==0) {
+      fprintf(out,"  {\n");
+      fprintf(out,"    \"t\": %lf,\n",t);
+      fprintf(out,"    \"x\": [ ");
+      for(i=0;i<n;i++) {
+        fprintf(out,(i!=n-1)?"%lf, ":"%lf ],\n",clamp(xv[2*i]));
+      }
+      fprintf(out,"    \"v\": [ ");
+      for(i=0;i<n;i++) {
+        fprintf(out,(i!=n-1)?"%lf, ":"%lf ],\n",clamp(xv[2*i+1]));
+      }
+      fprintf(out,"    \"p\": [ ");
+      for(i=0;i<n;i++) {
+        fprintf(out,(i!=n-1)?"%lf, ":"%lf ]\n",clamp(p[i]));
+      }
+      fprintf(out,(j+output_filter<iterations)?"  },\n":"  }\n");
+    }
     // ========
     t+=h;
     memcpy(xv,xv_new,sizeof(double)*2*n);
