@@ -8,7 +8,7 @@
 		<p>Select a data file (output from the C code):</p>
 		<p><input type=file></p>
 		<p><a href="#" onclick="setupViz()">Restart Visualization</a></p>
-		<div id="holder"></div>
+    <div id="presently"></div>
 		<script>
 			var upload = document.getElementsByTagName('input')[0];
 			if(typeof window.FileReader === 'undefined') {
@@ -27,7 +27,7 @@
 
 					var timescale = ( data[1].t-data[0].t ) * 1000;
           var velocity_scale = d3.scale.linear().domain([0,12]).range(["black","red"]);
-          var pressure_scale = d3.scale.linear().domain([-16,16]).range(["green","blue"]);
+          var pressure_scale = d3.scale.linear().domain([-30,30]).range(["green","blue"]);
 					var box_width = 2;
 					var box_height = 8;
 					var box_spacing = 0;
@@ -43,6 +43,7 @@
 					var i = 0;
 					function redraw() {
 						if(i+1<data.length) {i++;}
+            d3.selectAll("#presently").data(data[i].t).text(function(d) {return "t: " + d + " ms";});
             viz.selectAll("rect.membrane").data(data[i].v).attr("fill",function(d) {return velocity_scale(d*d);});
 						viz.selectAll("rect.membrane").data(data[i].x).attr("y",function(d) {return h - y_scale(d);});
             viz.selectAll("rect.fluid").data(data[i].p).attr("fill",function(d) {return pressure_scale(d);});

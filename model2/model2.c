@@ -71,7 +71,7 @@ int main(int argc, char** argv) {
 
 /* Algorithm and values from (Diependaal 1988) */
 
-  double ell_max=35.0; // (mm) length of basilar membrane
+  double ell_max=30.0; // (mm) length of basilar membrane
 	int n=512; // Number of discrete steps for ell
   double delta = ell_max / (double)n; // Size of discrete steps in ell
 	int i; //General purpose loop index, generally ranges from 0 to n-1
@@ -91,18 +91,26 @@ int main(int argc, char** argv) {
   /* Behavior of basilar membrane */
   double g(double ell, double x, double v) {
     double k(double ell, double x, double v) {
-      return 20000*exp(-0.3*ell); // (mg mm^-2 ms^-2)
+      return 15000*exp(-0.3*ell); // (mg mm^-2 ms^-2)
     }
     double b(double ell, double x, double v) {
-      return 10*exp(-0.15*ell); // (mg mm^-2 ms^-1)
+      return 40*exp(-0.15*ell); // (mg mm^-2 ms^-1)
     }
     return k(ell,x,v)*x + b(ell,x,v)*v;
   }
 
   /* Forcing/driving/input function */
 	double input(double t) {
-		double scale=1.0;
-    return scale*sin(t*8);
+    double TAU = 6.283;
+    double dsinwt(double w, double t) {
+      return TAU*w*cos(TAU*w*t);
+    }
+		double scale=0.4;
+    double signal = 0.0;
+    signal += 1.5*dsinwt(0.2616*16.0,t);
+    signal += 1.0*dsinwt(0.3296*8.0,t);
+    signal += 1.0*dsinwt(0.3920*4.0,t);
+    return scale*signal;
 	}
 
   /* Membrane displacement and velocity */
