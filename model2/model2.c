@@ -2,6 +2,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <sys/types.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 /* Dependency on GSL: to install on OSX, sudo port install gsl-devel */
 #include "gsl/gsl_linalg.h"
 
@@ -67,11 +71,43 @@ void alloc_out(int n, int steps, double** tout, double*** xout) {
 
 /* END GENERIC RUNGE-KUTTA IMPLEMENTATION */
 
+void* open_mmapped_file_read(const char* filename, int* length) {
+  struct stat fs;
+  int fd;
+  void* region;
+
+  //First we stat the file to get its length.
+  if(stat(filename, &fs)) {
+    perror("cannot read file");
+    return NULL;
+  }
+  *length = fs.st_size;
+  
+  //Now get a file descriptor and mmap!
+  fd = open(filename, O_RDONLY);
+  region=mmap(NULL, *length, PROT_READ, MAP_SHARED, fd, 0);
+
+  return region;
+}
+
+double input_from_audio_file(void* region, int length, double t) {
+  double sample_hz = 11025.0;
+  double h = 1/sample_hz;
+  int sample_num = (int)(sample_hz*t);
+  sample_num+=2;
+  if(sample_num >= length/sizeof(float)) { return 0.0; }
+  double fm2 = (double)(((float*)region)[sample_num-2]);
+  double fm1 = (double)(((float*)region)[sample_num-1]);
+  double fp1 = (double)(((float*)region)[sample_num+1]);
+  double fp2 = (double)(((float*)region)[sample_num+2]);
+  return (1/(12*h))*(fm2-8*fm1+8*fp1-fp2);
+}
+
 int main(int argc, char** argv) {
 
 /* Algorithm and values from (Diependaal 1988) */
 
-  double ell_max=30.0; // (mm) length of basilar membrane
+  double ell_max=20.0; // (mm) length of basilar membrane
 	int n=512; // Number of discrete steps for ell
   double delta = ell_max / (double)n; // Size of discrete steps in ell
 	int i; //General purpose loop index, generally ranges from 0 to n-1
@@ -82,7 +118,7 @@ int main(int argc, char** argv) {
 
   /* Time-independent parameters */
   double m(double ell) { // mass of membrane unit
-    return 0.5; // (mg/mm^2)
+    return 0.5+ell*0.01; // (mg/mm^2)
   }
   double alpha(double ell) { // alpha = 2 * density * membrane_thickness / mass * channel_area
     return 0.4; // (mm^-2)
@@ -91,26 +127,31 @@ int main(int argc, char** argv) {
   /* Behavior of basilar membrane */
   double g(double ell, double x, double v) {
     double k(double ell, double x, double v) {
-      return 15000*exp(-0.3*ell); // (mg mm^-2 ms^-2)
+      return 80000*exp(-0.3*ell); // (mg mm^-2 ms^-2)
     }
     double b(double ell, double x, double v) {
-      return 40*exp(-0.15*ell); // (mg mm^-2 ms^-1)
+      return 10*exp(-0.004*ell); // (mg mm^-2 ms^-1)
     }
     return k(ell,x,v)*x + b(ell,x,v)*v;
   }
 
   /* Forcing/driving/input function */
+  int audio_length;
+  void* audio = open_mmapped_file_read("ah.raw",&audio_length);
 	double input(double t) {
+    return input_from_audio_file(audio,audio_length,t);
+    /*
     double TAU = 6.283;
     double dsinwt(double w, double t) {
       return TAU*w*cos(TAU*w*t);
     }
-		double scale=0.4;
+		double scale=1.0;
     double signal = 0.0;
-    signal += 1.5*dsinwt(0.2616*16.0,t);
-    signal += 1.0*dsinwt(0.3296*8.0,t);
-    signal += 1.0*dsinwt(0.3920*4.0,t);
+    //signal += 1.5*dsinwt(0.2616*16.0,t);
+    signal += 1.0*dsinwt(0.3996*8.0,t);
+    //signal += 1.0*dsinwt(0.3920*4.0,t);
     return scale*signal;
+    */
 	}
 
   /* Membrane displacement and velocity */

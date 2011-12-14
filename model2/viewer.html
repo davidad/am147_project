@@ -8,12 +8,17 @@
 		<p>Select a data file (output from the C code):</p>
 		<p><input type=file></p>
 		<p><a href="#" onclick="setupViz()">Restart Visualization</a></p>
+		<p><a href="#" onclick="pauseViz()">Pause Visualization</a></p>
     <div id="presently"></div>
 		<script>
 			var upload = document.getElementsByTagName('input')[0];
 			if(typeof window.FileReader === 'undefined') {
 				alert("HTML5 File API not supported");
 			}
+      var pause = 0;
+      function pauseViz() {
+        pause = !pause;
+      }
 			function setupViz() {
 				var file = upload.files[0], reader = new FileReader();
 				var holder = document.getElementById('holder');
@@ -26,8 +31,8 @@
 					holder.appendChild(dataview);*/
 
 					var timescale = ( data[1].t-data[0].t ) * 1000;
-          var velocity_scale = d3.scale.linear().domain([0,12]).range(["black","red"]);
-          var pressure_scale = d3.scale.linear().domain([-30,30]).range(["green","blue"]);
+          var velocity_scale = d3.scale.linear().domain([0,3]).range(["black","red"]);
+          var pressure_scale = d3.scale.linear().domain([-200,200]).range(["green","blue"]);
 					var box_width = 2;
 					var box_height = 8;
 					var box_spacing = 0;
@@ -42,14 +47,15 @@
           viz.selectAll("rect.membrane").data(data[0].x).enter().append("svg:rect").classed("membrane",1).attr("x", function(d,i) {return x_scale(i);}).attr("y", function(d) {return h - y_scale(d.value);}).attr("width",box_width).attr("height",box_height);
 					var i = 0;
 					function redraw() {
-						if(i+1<data.length) {i++;}
+						if(i+1<data.length && !pause) {i++;}
             d3.selectAll("#presently").data(data[i].t).text(function(d) {return "t: " + d + " ms";});
-            viz.selectAll("rect.membrane").data(data[i].v).attr("fill",function(d) {return velocity_scale(d*d);});
+            viz.selectAll("rect.membrane").data(data[i].v).attr("fill",function(d) {return velocity_scale(Math.abs(d));});
 						viz.selectAll("rect.membrane").data(data[i].x).attr("y",function(d) {return h - y_scale(d);});
             viz.selectAll("rect.fluid").data(data[i].p).attr("fill",function(d) {return pressure_scale(d);});
 					}
 					setInterval(redraw,timescale);
 				}
+        pause = 0;
 				reader.readAsText(file);
 			}
 			upload.onchange = function(e) {
